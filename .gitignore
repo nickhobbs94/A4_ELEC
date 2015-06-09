@@ -5,3 +5,6 @@ clearWorkspace.sh
 *.out
 *.o
 *.d
+A4_bsp/
+Efsl/
+src/
