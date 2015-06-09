@@ -1,1 +1,0 @@
-#define OUR_SD_DIR_LOCATION "/Users/nicholashobbs/Desktop/SD3.dmg"

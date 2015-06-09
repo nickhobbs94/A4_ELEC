@@ -17,7 +17,6 @@
 #define MAX_NUM_STRINGLEN 10
 
 
-
 /* ----------------------------------- Functions ----------------------------------- */
 
 alt_32 intfromstring(alt_8 string[]) {

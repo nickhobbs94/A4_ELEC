@@ -4,9 +4,6 @@
 
 
 /* Includes */
-//#include "home.h"
-#include "uni.h"
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -15,6 +12,7 @@
 #include "includes.h"
 
 #include "terminalParse.h"
+#include "wavPlay.h"
 /* ----------------------------------- Functions ----------------------------------- */
 
 void task1(void* pdata) {
@@ -24,16 +22,18 @@ void task1(void* pdata) {
 
 
 void task2(void* pdata) {
-	static int count = 0;
+	/*static int count = 0;
 	unsigned char err;
 	unsigned short timeout=0;
 	POST mailBox;
 	while(1){
-		/*mailBox = *(POST*)OSMboxPend(Mbox1, timeout, &err);
-		printf("task2 :) %d %s\n", count, mailBox.filename);*/
+		mailBox = *(POST*)OSMboxPend(Mbox1, timeout, &err);
+		printf("task2 :) %d %s\n", count, mailBox.filename);
 		OSTimeDly(1);
 		count++;
-	}
+	}*/
+
+	audioController();
 }
 
 

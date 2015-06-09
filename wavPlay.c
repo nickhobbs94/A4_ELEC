@@ -1,5 +1,6 @@
 #include "wavPlay.h"
 #include "alt_types.h"
+#include "threading.h"
 
 #define SIZE_OF_HEADER 44
 #define OUTPUT_BUFFER_LEN 512
@@ -121,5 +122,15 @@ alt_32 load_fifo (alt_u8 init_flag) {
 
 	/* set interrupt to run */
 	return 0;
+}
+
+void audioController() {
+	unsigned char err;
+	unsigned short timeout=0;
+	POST mailBox;
+
+	while (1) {
+
+	}
 }
 
