@@ -3,4 +3,5 @@ copyToWorkspace.sh
 getFromWorkspace.sh
 clearWorkspace.sh
 *.out
-
+*.o
+*.d
