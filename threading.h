@@ -7,7 +7,7 @@
 OS_EVENT* Mbox1;
 OS_EVENT* Mbox2;
 
-#define STRING_LEN 4
+OS_MEM* Memory_Partition;
 
 
 typedef struct {

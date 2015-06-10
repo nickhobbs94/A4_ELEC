@@ -3,8 +3,7 @@
  * it also includes functions to interpret the commands given and pass them
  * to terminalFunctions
  */
-#ifndef TERMINALPARSE_H
-#define TERMINALPARSE_H
+
 
 /* Includes */
 #include <stdio.h>
@@ -235,5 +234,4 @@ alt_32 puttyGetline(alt_8 string[], alt_32 lineLength){
 	return i;
 }
 
-#endif
 

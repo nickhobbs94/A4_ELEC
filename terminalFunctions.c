@@ -21,7 +21,13 @@
 #include "includes.h"
 #include "wavPlay.h"
 #include "terminalFunctions.h"
-
+#include "LCD_Control.h"
+#include "terminalParse.h"
+#include "AUDIO.h"
+#include "opencores_i2c.h"
+#include "opencores_i2c_regs.h"
+#include "altera_up_avalon_audio_regs_dgz.h"
+#include "altera_up_avalon_audio_dgz.h"
 
 /* Magic numbers */
 #define NUMBER_OF_LEDS 18

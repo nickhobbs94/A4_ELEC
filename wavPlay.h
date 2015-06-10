@@ -3,12 +3,9 @@
 
 #include "alt_types.h"
 
-/* Function Prototypes */
-void audioController();
-Wave_Header check_header (alt_8 filename[], alt_u8 *err);
-alt_32 load_fifo (alt_u8 init_flag);
 
 
+#define STRING_LEN 4
 /* Define structure of header */
 typedef struct{
 	/* "RIFF" Descriptor */
@@ -28,5 +25,11 @@ typedef struct{
 	alt_8 Subchunk2_ID[STRING_LEN];
 	alt_32 Subchunk2_Size;
 } Wave_Header;
+
+
+/* Function Prototypes */
+void audioController();
+Wave_Header check_header (alt_8 filename[], alt_u8 *err);
+alt_32 load_fifo (alt_u8 init_flag);
 
 #endif

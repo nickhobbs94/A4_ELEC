@@ -10,11 +10,12 @@
 //#include "ls.h" // from std EFSL library
 #include "conversions.h"
 #include "SD_functions.h"
+#include "terminalParse.h"
 
 /* Magic numbers */
-#define SD_MAX_PATH_LENGTH 200
+
 #define SD_FOLDER_BITMASK 0x10
-#define UNMOUNT_SD_AFTER_OPERATION 0
+
 
 /* ------------------------- Functions -------------------------- */
 
@@ -87,5 +88,4 @@ void SD_updatePath(alt_8* currentPath, alt_8 argument[]){
 	}
 }
 
-#endif
 

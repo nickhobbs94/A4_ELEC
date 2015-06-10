@@ -3,6 +3,10 @@
 
 /* Includes */
 #include "alt_types.h"
+#include "efs.h"
+
+#define UNMOUNT_SD_AFTER_OPERATION 0
+#define SD_MAX_PATH_LENGTH 200
 
 /* Function prototypes */
 EmbeddedFileSystem** SD_mount();

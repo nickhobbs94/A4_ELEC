@@ -1,8 +1,6 @@
 #include "altstring.h"
 
-/* Magic numbers */
-#define MAX_STRINGLEN 200
-#define FAT_32_FILELENGTH 11
+
 
 /* ------------------------- Functions -------------------------- */
 

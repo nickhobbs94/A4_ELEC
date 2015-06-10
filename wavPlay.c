@@ -1,7 +1,15 @@
 #include "wavPlay.h"
 #include "alt_types.h"
 #include "threading.h"
-
+#include "efs.h"
+#include "SD_functions.h"
+#include "terminalParse.h"
+#include "AUDIO.h"
+#include "opencores_i2c.h"
+#include "opencores_i2c_regs.h"
+#include "altera_up_avalon_audio_regs_dgz.h"
+#include "altera_up_avalon_audio_dgz.h"
+#include "altstring.h"
 #define SIZE_OF_HEADER 44
 #define OUTPUT_BUFFER_LEN 512
 #define READ_IN 4096
@@ -10,11 +18,14 @@
 
 
 Wave_Header check_header (alt_8 filename[], alt_u8 *err) {
+	Wave_Header found_header;
+	found_header.Chunk_ID[0] = 0;
+
 	/* Try to mount SD card */
 	EmbeddedFileSystem* efsl;
 	efsl = *(SD_mount());
 	if (efsl==NULL){
-		return;
+		return found_header;
 	}
 
 	/* Get absolute path */
@@ -29,7 +40,7 @@ Wave_Header check_header (alt_8 filename[], alt_u8 *err) {
 		if (UNMOUNT_SD_AFTER_OPERATION){
 			SD_unmount();
 		}
-		return;
+		return found_header;
 	}
 
 	/* Try to read header from file */
@@ -38,13 +49,13 @@ Wave_Header check_header (alt_8 filename[], alt_u8 *err) {
 	result = file_read(&file,SIZE_OF_HEADER,buffer);
 	if (result != SIZE_OF_HEADER){
 		puttyPrintLine("Error reading header\n\r");
-		return;
+		return found_header;
 	}
 
 	/* Init audio codec and device (only needs to be done once) */
 	if ( !AUDIO_Init() ) {
 		printf("Unable to initialise audio codec\n");
-		return;
+		return found_header;
 	}
 
 	/* Set pointer to header structure to the newly read header */
@@ -53,7 +64,7 @@ Wave_Header check_header (alt_8 filename[], alt_u8 *err) {
 
 	if (charsCompare(header_data->Format, "WAVE", 4) == -1) {
 		puttyPrintLine("Wrong format or corrupt header\n\r");
-		return;
+		return found_header;
 	}
 
 	/* Set the sampling frequency (do this every time a new stream is loaded) */
@@ -63,7 +74,7 @@ Wave_Header check_header (alt_8 filename[], alt_u8 *err) {
 		case 44100:  AUDIO_SetSampleRate(RATE_ADC44K_DAC44K_USB);         break;
 		case 48000:  AUDIO_SetSampleRate(RATE_ADC48K_DAC48K_USB);         break;
 		case 96000:  AUDIO_SetSampleRate(RATE_ADC96K_DAC96K_USB);         break;
-		default:     puttyPrintLine("Non-standard sampling rate\n\r");    return;
+		default:     puttyPrintLine("Non-standard sampling rate\n\r");    return found_header;
 	}
 
 	/* Print some header data */
@@ -114,8 +125,10 @@ alt_32 load_fifo (alt_u8 init_flag) {
 	alt_u32 buffer1[OUTPUT_BUFFER_LEN];
 	alt_u32 buffer2[OUTPUT_BUFFER_LEN];
 
+
 	/* read file */
 	while (totalBytesRead < header_data.Subchunk2_Size){
+
 		break;
 	}
 

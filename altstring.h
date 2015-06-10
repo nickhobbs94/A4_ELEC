@@ -8,6 +8,10 @@ altstring.h is an alt_types version of string.h
 /* Includes */
 #include "alt_types.h"
 
+/* Magic numbers */
+#define MAX_STRINGLEN 200
+#define FAT_32_FILELENGTH 11
+
 /* Function prototypes */
 alt_32 altstrlen(alt_8* string);
 alt_8* altstrcpy(alt_8* destination, alt_8* source);
