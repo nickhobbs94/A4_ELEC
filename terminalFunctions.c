@@ -489,10 +489,10 @@ alt_32 wav_play(alt_32 argc, alt_8* argv[]){
 		puttyPrintLine("Syntax: %s filepath\n\r", argv[0]);
 		return -1;
 	}
-	
+
 	Wave_Header header_data;
 	alt_u8 errorCheck = 0;
-	
+
 	/* Check and get the wav header */
 	header_data = check_header(argv[1], &errorCheck); // TODO get errors working
 	
@@ -513,9 +513,6 @@ alt_32 wav_play(alt_32 argc, alt_8* argv[]){
 	altstrcpy(mail.filename, argv[1]);
 	mail.header_data = header_data;
 	OSMboxPost(Mbox1, &mail);
-	
-	/* Load the FIFO (init) */
-	load_fifo(1);
 	return 0;
 }
 

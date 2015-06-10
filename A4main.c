@@ -32,7 +32,6 @@ void task2(void* pdata) {
 		OSTimeDly(1);
 		count++;
 	}*/
-
 	audioController();
 }
 

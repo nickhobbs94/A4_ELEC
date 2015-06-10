@@ -2,6 +2,7 @@
 #define THREADING_H
 
 #include "includes.h"
+#include "wavPlay.h"
 
 OS_EVENT* Mbox1;
 OS_EVENT* Mbox2;

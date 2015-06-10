@@ -114,9 +114,10 @@ alt_32 load_fifo (alt_u8 init_flag) {
 	alt_u32 buffer1[OUTPUT_BUFFER_LEN];
 	alt_u32 buffer2[OUTPUT_BUFFER_LEN];
 
-
 	/* read file */
-
+	while (totalBytesRead < header_data.Subchunk2_Size){
+		break;
+	}
 
 	/* load buffers into FIFO */
 
@@ -127,10 +128,11 @@ alt_32 load_fifo (alt_u8 init_flag) {
 void audioController() {
 	unsigned char err;
 	unsigned short timeout=0;
-	POST mailBox;
+	POST mail;
 
 	while (1) {
-
+		mail = *(POST*) OSMboxPend(Mbox1, timeout, &err);
+		printf("%s\n", mail.filename);
 	}
 }
 

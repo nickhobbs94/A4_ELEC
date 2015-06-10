@@ -1,14 +1,7 @@
 LINK_TARGET = a4.out
 
 INC = \
- A4_bsp \
- A4_bsp/UCOSII \
- A4_bsp/HAL/inc \
- Efsl/src \
- Efsl/conf \
- Efsl/inc \
- Efsl/inc/interfaces \
- Efsl/conf
+ src
 
 
 INC_PARAMS= -I. $(foreach d, $(INC), -I$d)
@@ -17,22 +10,22 @@ CFLAGS = $(INC_PARAMS)
 
 VPATH = .$(foreach d, $(INC),:$d)
 
-OBJS =  \
- A4main.o \
- altstring.o \
- AUDIO.o \
- conversions.o \
- LCD_Control.o \
- opencores_i2c.o \
- SD_functions.o \
- terminalFunctions.o \
- terminalParse.o \
- wavPlay.o
+# OBJS =  \
+#  A4main.o \
+#  altstring.o \
+#  AUDIO.o \
+#  conversions.o \
+#  LCD_Control.o \
+#  opencores_i2c.o \
+#  SD_functions.o \
+#  terminalFunctions.o \
+#  terminalParse.o \
+#  wavPlay.o
 
-#OBJS = \
-# test.o \
-# altstring.o \
-# sub.o 
+OBJS = \
+test.o \
+altstring.o \
+sub.o 
 
 
 
@@ -53,7 +46,6 @@ $(LINK_TARGET): $(OBJS)
 # pattern rule to compile .c files to .o and .d
 # things (@ commands) below are weird see: scottmcpeak.com/autodepend/autodepend.html
 %.o: %.c
-	@echo $(VPATH)
 	gcc $(CFLAGS) -o $@ -c $<
 	gcc -MM $(CFLAGS) $< > $*.d
 
