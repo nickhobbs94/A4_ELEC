@@ -43,7 +43,7 @@ void task2(void* pdata) {
 
 /* Definition of Task Priorities */
 
-#define TASK1_PRIORITY      2
+#define TASK1_PRIORITY      1
 #define TASK2_PRIORITY      1
 
 /* The main function creates two task and starts multi-tasking */

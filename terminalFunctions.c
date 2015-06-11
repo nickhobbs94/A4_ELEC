@@ -507,11 +507,6 @@ alt_32 wav_play(alt_32 argc, alt_8* argv[]){
 	puttyPrintLine("\n\rFormat: ");
 	puttyPrintChars(header_data.Format, STRING_LEN);
 
-	/* stop interrupt */
-	alt_up_audio_dev*  audio_dev;
-	audio_dev = alt_up_audio_open_dev(AUDIO_NAME);
-	alt_up_audio_disable_write_interrupt(audio_dev);
-
 
 	/* Send the file in the mail */
 	POST mail;

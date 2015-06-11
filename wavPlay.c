@@ -101,6 +101,9 @@ alt_32 load_fifo (alt_u8* fileBuffer, alt_32 size, Wave_Header* header_data) {
 	alt_u32 buffer1[OUTPUT_BUFFER_LEN];
 	alt_u32 buffer2[OUTPUT_BUFFER_LEN];
 
+	alt_up_audio_dev*  audio_dev;
+	audio_dev = alt_up_audio_open_dev(AUDIO_NAME);
+
 	alt_32 bytesPerSample = header_data->Bits_Per_Sample / 8;
 	alt_32 shift = 32 - header_data->Bits_Per_Sample;
 	alt_32 mask = 0xffffffff;
@@ -136,46 +139,55 @@ alt_32 load_fifo (alt_u8* fileBuffer, alt_32 size, Wave_Header* header_data) {
 	return 0;
 }
 
-void audio_irq_handler(void* context) {
-	if (alt_up_audio_write_interrupt_pending(audio_dev)) {
-		//Disable audio output interrupt 
-		alt_up_audio_disable_write_interrupt(audio_dev);
-		POST* mail = (POST*) context;
-		Wave_Header* header_data = &(context->header_data);
-		load_fifo(context->fileBuffer, context->fileBufferSize, header_data);
-	}
-}
 
 void audioController() {
 	alt_u8 err;
 	alt_u16 timeout=0;
-	POST mail;
+	POST mail, *newmail;
 	alt_8 isPlaying = 0;
 	alt_32 FILE_BUFFER_LEN;
 	alt_u8* fileBuffer;
-	alt_u8* currentBuffer;
-	alt_u8 currentBufferNumber = 0;
+	alt_32 totalBytesRead = 0;
+	alt_32 bytesRead = 0;
 
+	mail = *(POST*) OSMboxPend(Mbox1, timeout, &err);
+
+	alt_up_audio_dev*  audio_dev;
+	audio_dev = alt_up_audio_open_dev(AUDIO_NAME);
+	
 	while (1) {
-		mail = *(POST*) OSMboxPend(Mbox1, timeout, &err);
 		printf("%s\n", mail.filename);
 		/* malloc 2 file buffers */
 		FILE_BUFFER_LEN = OUTPUT_BUFFER_LEN * mail.header_data.Num_Channels * mail.header_data.Bits_Per_Sample/8;
-		fileBuffer = malloc(2 * FILE_BUFFER_LEN);
+		fileBuffer = malloc(FILE_BUFFER_LEN);
 		isPlaying = 1;
 
-		/* update mail for ISR */
-
-		/* while playing file */
 		while(isPlaying){
 			/* check for new mail but don't pend */
-			/* read data into current file buffer */
-			/* wait until interrupts aren't running anymore */
-			alt_irq_register(AUDIO_IRQ, &mail, audio_irq_handler);
-			/* set interrupt for current file buffer */
-			/* switch to other file buffer */
+			newmail = (POST) OSMboxAccept(Mbox1);
+			if (newmail != NULL){
+				mail = *newmail;
+				break;
+			}
+			
+			/* read data into file buffer */
+			bytesRead = readFile(mail.filename, fileBuffer, totalBytesRead + mail.header_data.Subchunk1_Size, FILE_BUFFER_LEN)
+			totalBytesRead += bytesRead;
+
+			/* wait until FIFO has enough space */
+			while(alt_up_audio_write_fifo_space(audio_dev,ALT_UP_AUDIO_RIGHT) < OUTPUT_BUFFER_LEN);
+			while(alt_up_audio_write_fifo_space(audio_dev,ALT_UP_AUDIO_LEFT) < OUTPUT_BUFFER_LEN);
+
+			/* load the FIFO */
+			load_fifo()
 		}
 		free(fileBuffer);
+		totalBytesRead = 0;
 	}
+}
+
+
+alt_32 readFile(alt_8* filename, alt_u8* fileBuffer, alt_32 offset, alt_32 size){
+	return 0;
 }
 
