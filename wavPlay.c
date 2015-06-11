@@ -10,6 +10,7 @@
 #include "altera_up_avalon_audio_regs_dgz.h"
 #include "altera_up_avalon_audio_dgz.h"
 #include "altstring.h"
+
 #define SIZE_OF_HEADER 44
 #define OUTPUT_BUFFER_LEN 512
 #define READ_IN 4096
@@ -96,92 +97,85 @@ Wave_Header check_header (alt_8 filename[], alt_u8 *err) {
 }
 
 
-alt_32 load_fifo (alt_u8 init_flag) {
-	static alt_8 filename[12];
-	static alt_32 totalBytesRead;
-	static alt_32 FILE_BUFFER_LEN;
-	static alt_up_audio_dev*  audio_dev;
-	static Wave_Header header_data;
-	static alt_32 bytesPerSample;
-
-
-
-	if (init_flag){
-		/* get filename and header from mail */
-		alt_u8 err;
-		alt_u16 timeout = 0;
-		POST mail = *(POST*)OSMboxPend(Mbox1, timeout, &err);
-		altstrcpy(filename, mail.filename);
-		header_data = mail.header_data;
-		printf("mail: %s, %d\n", filename, header_data.Bits_Per_Sample);
-
-		bytesPerSample = header_data.Bits_Per_Sample / 8;
-		FILE_BUFFER_LEN = OUTPUT_BUFFER_LEN * header_data.Num_Channels * bytesPerSample;
-		audio_dev = alt_up_audio_open_dev(AUDIO_NAME);
-		totalBytesRead = 0;
-
-
-		alt_irq_register(AUDIO_IRQ, NULL, audio_irq_handler);
-		// Here the argument a_void_pointer is of type {\tt void*}, that will
-		// be copied to the argument context in the audio_irq_handler
-		// function. If you don’t want to pass an argument then replace it
-		// by NULL
-	}
-
-	/* make buffers */
+alt_32 load_fifo (alt_u8* fileBuffer, alt_32 size, Wave_Header* header_data) {
 	alt_u32 buffer1[OUTPUT_BUFFER_LEN];
 	alt_u32 buffer2[OUTPUT_BUFFER_LEN];
-	alt_32 bytesRead = 0;
 
-	/* open file */
+	alt_32 bytesPerSample = header_data->Bits_Per_Sample / 8;
+	alt_32 shift = 32 - header_data->Bits_Per_Sample;
+	alt_32 mask = 0xffffffff;
 
-	/* read file */
-	/* Read enough data for the number of channels to load one buffer's worth each */
-	if (totalBytesRead + FILE_BUFFER_LEN < header_data->Subchunk2_Size){
-		bytesRead = file_read(&file, FILE_BUFFER_LEN, fileBuffer);
-		totalBytesRead += bytesRead;
-	} else {
-		printf("End of file\n");
-		bytesRead = file_read(&file, (header_data->Subchunk2_Size - totalBytesRead), fileBuffer);
-		totalBytesRead += bytesRead;
+	if (header_data->Bits_Per_Sample == 8){
+		shift--;
+		mask = 0x0fffffff;
 	}
 
-	/* If the bytes just read is not large enough and the end of the file 
-		has not been reached, then return an error */
-	if (bytesRead != FILE_BUFFER_LEN   &&   totalBytesRead < header_data->Subchunk2_Size){
-		puttyPrintLine("End of file was unexpectedly reached %d %d %d\n\r", bytesRead, totalBytesRead, header_data->Subchunk2_Size);
-		free(fileBuffer);
-		file_fclose(&file);
-		if (UNMOUNT_SD_AFTER_OPERATION){
-			SD_unmount();
+	/* Split the buffer into the number of channels and amplify if not 32 bit sampling */
+	for (i=0; i<size; i++){
+		switch(header_data->Num_Channels){
+			case 1:
+				buffer1[i] = extract_little(fileBuffer + i*bytesPerSample, bytesPerSample) & mask;
+				buffer2[i] = buffer1[i] & mask;
+				buffer1[i] = buffer1[i] << shift;
+				buffer2[i] = buffer2[i] << shift;
+				break;
+			case 2:
+				buffer1[i] = extract_little(fileBuffer + i*bytesPerSample*2, bytesPerSample) & mask;
+				buffer2[i] = extract_little(fileBuffer + i*bytesPerSample*2 + bytesPerSample, bytesPerSample) & mask;
+				buffer1[i] = buffer1[i] << shift;
+				buffer2[i] = buffer2[i] << shift;
+				break;
+			default:
+				printf("Unsupported number of channels\n");
+				return -1;
 		}
-		return -1;
 	}
-
-	/* close file */
-
-	/* load buffers into FIFO */
-
-	/* set interrupt to run */
-	alt_up_audio_enable_write_interrupt(audio_dev);
+	/* Write data into right and left channel of audio codec FIFO */
+	alt_up_audio_write_fifo(audio_dev, (unsigned int*)buffer1, size/header_data->Num_Channels, ALT_UP_AUDIO_RIGHT);
+	alt_up_audio_write_fifo(audio_dev, (unsigned int*)buffer2, size/header_data->Num_Channels, ALT_UP_AUDIO_LEFT);
 	return 0;
 }
 
 void audio_irq_handler(void* context) {
 	if (alt_up_audio_write_interrupt_pending(audio_dev)) {
-	//Disable audio output interrupt 
-	alt_up_audio_disable_write_interrupt(audio_dev);
+		//Disable audio output interrupt 
+		alt_up_audio_disable_write_interrupt(audio_dev);
+		POST* mail = (POST*) context;
+		Wave_Header* header_data = &(context->header_data);
+		load_fifo(context->fileBuffer, context->fileBufferSize, header_data);
 	}
 }
 
 void audioController() {
-	unsigned char err;
-	unsigned short timeout=0;
+	alt_u8 err;
+	alt_u16 timeout=0;
 	POST mail;
+	alt_8 isPlaying = 0;
+	alt_32 FILE_BUFFER_LEN;
+	alt_u8* fileBuffer;
+	alt_u8* currentBuffer;
+	alt_u8 currentBufferNumber = 0;
 
 	while (1) {
 		mail = *(POST*) OSMboxPend(Mbox1, timeout, &err);
 		printf("%s\n", mail.filename);
+		/* malloc 2 file buffers */
+		FILE_BUFFER_LEN = OUTPUT_BUFFER_LEN * mail.header_data.Num_Channels * mail.header_data.Bits_Per_Sample/8;
+		fileBuffer = malloc(2 * FILE_BUFFER_LEN);
+		isPlaying = 1;
+
+		/* update mail for ISR */
+
+		/* while playing file */
+		while(isPlaying){
+			/* check for new mail but don't pend */
+			/* read data into current file buffer */
+			/* wait until interrupts aren't running anymore */
+			alt_irq_register(AUDIO_IRQ, &mail, audio_irq_handler);
+			/* set interrupt for current file buffer */
+			/* switch to other file buffer */
+		}
+		free(fileBuffer);
 	}
 }
 

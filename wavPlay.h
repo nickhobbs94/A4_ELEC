@@ -29,7 +29,7 @@ typedef struct{
 
 /* Function Prototypes */
 Wave_Header check_header (alt_8 filename[], alt_u8 *err);
-alt_32 load_fifo (alt_u8 init_flag);
+alt_32 load_fifo (alt_u8* fileBuffer, alt_32 size, Wave_Header* header_data)
 void audio_irq_handler(void* context);
 void audioController();
 
