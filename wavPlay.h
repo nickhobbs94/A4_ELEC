@@ -28,8 +28,9 @@ typedef struct{
 
 
 /* Function Prototypes */
-void audioController();
 Wave_Header check_header (alt_8 filename[], alt_u8 *err);
 alt_32 load_fifo (alt_u8 init_flag);
+void audio_irq_handler(void* context);
+void audioController();
 
 #endif

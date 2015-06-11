@@ -119,23 +119,59 @@ alt_32 load_fifo (alt_u8 init_flag) {
 		FILE_BUFFER_LEN = OUTPUT_BUFFER_LEN * header_data.Num_Channels * bytesPerSample;
 		audio_dev = alt_up_audio_open_dev(AUDIO_NAME);
 		totalBytesRead = 0;
+
+
+		alt_irq_register(AUDIO_IRQ, NULL, audio_irq_handler);
+		// Here the argument a_void_pointer is of type {\tt void*}, that will
+		// be copied to the argument context in the audio_irq_handler
+		// function. If you don’t want to pass an argument then replace it
+		// by NULL
 	}
 
 	/* make buffers */
 	alt_u32 buffer1[OUTPUT_BUFFER_LEN];
 	alt_u32 buffer2[OUTPUT_BUFFER_LEN];
+	alt_32 bytesRead = 0;
 
+	/* open file */
 
 	/* read file */
-	while (totalBytesRead < header_data.Subchunk2_Size){
-
-		break;
+	/* Read enough data for the number of channels to load one buffer's worth each */
+	if (totalBytesRead + FILE_BUFFER_LEN < header_data->Subchunk2_Size){
+		bytesRead = file_read(&file, FILE_BUFFER_LEN, fileBuffer);
+		totalBytesRead += bytesRead;
+	} else {
+		printf("End of file\n");
+		bytesRead = file_read(&file, (header_data->Subchunk2_Size - totalBytesRead), fileBuffer);
+		totalBytesRead += bytesRead;
 	}
+
+	/* If the bytes just read is not large enough and the end of the file 
+		has not been reached, then return an error */
+	if (bytesRead != FILE_BUFFER_LEN   &&   totalBytesRead < header_data->Subchunk2_Size){
+		puttyPrintLine("End of file was unexpectedly reached %d %d %d\n\r", bytesRead, totalBytesRead, header_data->Subchunk2_Size);
+		free(fileBuffer);
+		file_fclose(&file);
+		if (UNMOUNT_SD_AFTER_OPERATION){
+			SD_unmount();
+		}
+		return -1;
+	}
+
+	/* close file */
 
 	/* load buffers into FIFO */
 
 	/* set interrupt to run */
+	alt_up_audio_enable_write_interrupt(audio_dev);
 	return 0;
+}
+
+void audio_irq_handler(void* context) {
+	if (alt_up_audio_write_interrupt_pending(audio_dev)) {
+	//Disable audio output interrupt 
+	alt_up_audio_disable_write_interrupt(audio_dev);
+	}
 }
 
 void audioController() {
