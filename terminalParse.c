@@ -87,6 +87,12 @@ alt_32 command_interpreter(alt_32 argc, alt_8* argv[]){
 		{"cat",read_file},
 		{"wav",wav_play},
 		{"playlist", playlist},
+		{"pause", tf_pause},
+		{"play", play},
+		{"repeat", repeat},
+		{"norepeat", norepeat},
+		{"volume", volume},
+		{"stop", stop},
 		{NULL,NULL} // This null function is to check we've read all the functions, new functions must go above it.
 	};
 	

@@ -94,12 +94,16 @@ alt_32 load_fifo (alt_u8* fileBuffer, alt_32 file_buffer_size, alt_32 output_buf
 				buffer2[i] = buffer1[i] & mask;
 				buffer1[i] = buffer1[i] << shift;
 				buffer2[i] = buffer2[i] << shift;
+				buffer1[i] = buffer1[i] >> (31 - playStatus.volume);
+				buffer2[i] = buffer2[i] >> (31 - playStatus.volume);
 				break;
 			case 2:
 				buffer1[i] = extract_little(fileBuffer + i*bytesPerSample*2, bytesPerSample) & mask;
 				buffer2[i] = extract_little(fileBuffer + i*bytesPerSample*2 + bytesPerSample, bytesPerSample) & mask;
 				buffer1[i] = buffer1[i] << shift;
 				buffer2[i] = buffer2[i] << shift;
+				buffer1[i] = buffer1[i] >> (31 - playStatus.volume);
+				buffer2[i] = buffer2[i] >> (31 - playStatus.volume);
 				break;
 			default:
 				printf("Unsupported number of channels\n");
@@ -164,6 +168,9 @@ alt_32 audioController(void* pdata) {
 	printf("begin loop\n");
 
 	while (totalBytesRead < header_data.Subchunk2_Size){
+		while (playStatus.pause){
+			OSTimeDly(100);
+		}
 		bytesRead = file_read(&file, fileBuffer_size, fileBuffer);
 		if (bytesRead == 0){
 			break;
@@ -250,7 +257,10 @@ alt_32 playlist_manager(void* pdata){
 							TASK_STACKSIZE,
 							NULL,
 							0);
-			current_song++;
+			if (playStatus.repeat == 0){
+				printf("repeat %d\n", playStatus.repeat);
+				current_song++;
+			}
 		}
 		OSTimeDly(100);
 	}

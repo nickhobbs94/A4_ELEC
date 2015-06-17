@@ -522,6 +522,10 @@ alt_32 playlist(alt_32 argc, alt_8* argv[]){
 		puttyPrintLine("Type \"%s help\" for a list of commands\n\r", argv[0]);
 		return -1;
 	}
+	playStatus.pause = 0;
+	playStatus.shuffle = 0;
+	playStatus.repeat = 0;
+	playStatus.volume = 31;
 	struct playlist_functions {
 		char* command_string;
 		alt_32 (*command_function)(alt_32 argc, alt_8* argv[]);
@@ -547,6 +551,54 @@ alt_32 playlist(alt_32 argc, alt_8* argv[]){
 	puttyPrintLine("Command not found\n\r");
 
 	return -1;
+}
+
+alt_32 tf_pause(alt_32 argc, alt_8* argv[]){
+	playStatus.pause = 1;
+	return 0;
+}
+
+alt_32 play(alt_32 argc, alt_8* argv[]){
+	playStatus.pause = 0;
+	return 0;
+}
+
+alt_32 repeat(alt_32 argc, alt_8* argv[]){
+	playStatus.repeat = 1;
+	return 0;
+}
+
+alt_32 norepeat(alt_32 argc, alt_8* argv[]){
+	playStatus.repeat = 0;
+	return 0;
+}
+
+alt_32 volume(alt_32 argc, alt_8* argv[]){
+	if (argc < 2){
+		puttyPrintLine("Syntax: %s up/down\n\r", argv[0]);
+	}
+	if (!altstrcmp(argv[1],"up")){
+		if (playStatus.volume < 31){
+			playStatus.volume++;
+		} else {
+			puttyPrintLine("Volume is at max\n\r");
+		}
+	} else if(!altstrcmp(argv[1], "down")) {
+		if (playStatus.volume > 0){
+			playStatus.volume--;
+		} else {
+			puttyPrintLine("Volume is at min\n\r");
+		}
+	} else {
+		puttyPrintLine("Syntax: %s up/down\n\r", argv[0]);
+	}
+	return 0;
+}
+
+alt_32 stop(alt_32 argc, alt_8* argv[]){
+	OSTaskDel(TASK2_PRIORITY);
+	OSTaskDel(TASK3_PRIORITY);
+	return 0;
 }
 
 #endif

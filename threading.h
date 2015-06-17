@@ -35,5 +35,12 @@ OS_STK task1_stk[TASK_STACKSIZE];
 OS_STK task2_stk[TASK_STACKSIZE];
 OS_STK task3_stk[TASK_STACKSIZE];
 
+struct {
+	unsigned char pause :1;
+	unsigned char repeat :1;
+	unsigned char shuffle :1;
+	unsigned char volume :5;
+} playStatus;
+
 #endif
 

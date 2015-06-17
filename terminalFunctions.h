@@ -19,6 +19,12 @@ alt_32 read_file(alt_32 argc, alt_8* argv[]);
 alt_32 copy_file(alt_32 argc, alt_8* argv[]);
 alt_32 wav_play(alt_32 argc, alt_8* argv[]);
 alt_32 playlist(alt_32 argc, alt_8* argv[]);
+alt_32 tf_pause(alt_32 argc, alt_8* argv[]);
+alt_32 play(alt_32 argc, alt_8* argv[]);
+alt_32 repeat(alt_32 argc, alt_8* argv[]);
+alt_32 norepeat(alt_32 argc, alt_8* argv[]);
+alt_32 volume(alt_32 argc, alt_8* argv[]);
+alt_32 stop(alt_32 argc, alt_8* argv[]);
 
 #endif
 

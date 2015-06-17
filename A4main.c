@@ -30,7 +30,10 @@ int main(){
 					0);
 
 
-
+	playStatus.pause = 0;
+	playStatus.shuffle = 0;
+	playStatus.repeat = 0;
+	playStatus.volume = 31;
 	OSStart();
 	return 0;
 }
