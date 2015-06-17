@@ -137,6 +137,7 @@ alt_32 audioController(void* pdata) {
 		printf("Filesystem correctly initialized\n");
 	} else {
 		printf("Could not init filesystem\n");
+		return -1;
 	}
 
 	check = file_fopen(&file, &efs.myFs, (unsigned char*)filename, 'r');
@@ -171,6 +172,7 @@ alt_32 audioController(void* pdata) {
 		while (playStatus.pause){
 			OSTimeDly(100);
 		}
+
 		bytesRead = file_read(&file, fileBuffer_size, fileBuffer);
 		if (bytesRead == 0){
 			break;

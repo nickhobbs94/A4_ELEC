@@ -7,7 +7,10 @@
 
 void task1(void* pdata);
 void task2(void* pdata);
+<<<<<<< HEAD
 void task3(void* pdata);
+=======
+>>>>>>> Roxy
 
 
 /* Definition of Task Stacks */
@@ -16,9 +19,14 @@ void task3(void* pdata);
 
 /* Definition of Task Priorities */
 
+<<<<<<< HEAD
 #define TASK1_PRIORITY      7
 #define TASK2_PRIORITY      6
 #define TASK3_PRIORITY      5
+=======
+#define TASK1_PRIORITY      6
+#define TASK2_PRIORITY      5
+>>>>>>> Roxy
 
 OS_EVENT* Mbox1;
 OS_EVENT* Mbox2;
@@ -33,6 +41,7 @@ typedef struct Mail {
 
 OS_STK task1_stk[TASK_STACKSIZE];
 OS_STK task2_stk[TASK_STACKSIZE];
+<<<<<<< HEAD
 OS_STK task3_stk[TASK_STACKSIZE];
 
 struct {
@@ -41,6 +50,8 @@ struct {
 	unsigned char shuffle :1;
 	unsigned char volume :5;
 } playStatus;
+=======
+>>>>>>> Roxy
 
 #endif
 

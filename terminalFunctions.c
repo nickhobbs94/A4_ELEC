@@ -414,7 +414,8 @@ alt_32  read_file(alt_32 argc, alt_8* argv[]){
 			printf("ERROR READING FILE\n\r");
 		} else {
 			buffer[e] = '\0';
-			printf("%s", buffer);
+			//printf("%s", buffer);
+			puttyPrintLine("%s", buffer);
 		}
 		
 
@@ -600,6 +601,8 @@ alt_32 stop(alt_32 argc, alt_8* argv[]){
 	OSTaskDel(TASK3_PRIORITY);
 	return 0;
 }
+
+
 
 #endif
 

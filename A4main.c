@@ -29,7 +29,6 @@ int main(){
 					NULL,
 					0);
 
-
 	playStatus.pause = 0;
 	playStatus.shuffle = 0;
 	playStatus.repeat = 0;
