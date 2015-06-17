@@ -2,7 +2,7 @@
 #define WAVPLAY_H
 
 #include "alt_types.h"
-
+#include "efs.h"
 
 
 #define STRING_LEN 4
@@ -28,10 +28,14 @@ typedef struct{
 
 
 /* Function Prototypes */
-Wave_Header check_header (alt_8 filename[], alt_u8 *err);
-alt_32 load_fifo (alt_u8* fileBuffer, alt_32 size, Wave_Header* header_data)
+alt_32 check_header (Wave_Header* header_data);
+alt_32 load_fifo (alt_u8* fileBuffer, alt_32 file_buffer_size, alt_32 output_buffer_size, Wave_Header* header_data);
 void audio_irq_handler(void* context);
-void audioController();
-alt_32 readFile(alt_8* filename, alt_u8* fileBuffer, alt_32 offset, alt_32 size);
+alt_32 audioController(void* pdata);
+alt_32 readFile(alt_8* filename, alt_u8* fileBuffer, File** filePointer, alt_32 size);
+alt_32 playlist_manager(void* pdata);
+
+
+#define MAX_LEN_PLAYLIST 20
 
 #endif

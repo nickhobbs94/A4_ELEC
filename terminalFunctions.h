@@ -18,8 +18,7 @@ alt_32 write_new_file(alt_32 argc, alt_8* argv[]);
 alt_32 read_file(alt_32 argc, alt_8* argv[]);
 alt_32 copy_file(alt_32 argc, alt_8* argv[]);
 alt_32 wav_play(alt_32 argc, alt_8* argv[]);
-
-
+alt_32 playlist(alt_32 argc, alt_8* argv[]);
 
 #endif
 

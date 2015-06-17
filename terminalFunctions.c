@@ -29,6 +29,8 @@
 #include "altera_up_avalon_audio_regs_dgz.h"
 #include "altera_up_avalon_audio_dgz.h"
 
+#include "playlist_functions.h"
+
 /* Magic numbers */
 #define NUMBER_OF_LEDS 18
 #define BINARY_BITS_IN_DECIMAL(decimalNumber) log2(decimalNumber)+1
@@ -496,27 +498,56 @@ alt_32 wav_play(alt_32 argc, alt_8* argv[]){
 		return -1;
 	}
 
-	Wave_Header header_data;
-	alt_u8 errorCheck = 0;
+	OSTaskDel(TASK2_PRIORITY);
 
-	/* Check and get the wav header */
-	header_data = check_header(argv[1], &errorCheck); // TODO get errors working
-	
-	puttyPrintLine("Chunk ID: ");
-	puttyPrintChars(header_data.Chunk_ID, STRING_LEN);
-	puttyPrintLine("\n\rFormat: ");
-	puttyPrintChars(header_data.Format, STRING_LEN);
+	static alt_8 filename[20];
+	altstrcpy(filename,argv[1]);
 
+	OSTaskCreateExt(task2,
+					filename,
+					(void *)&task2_stk[TASK_STACKSIZE-1],
+					TASK2_PRIORITY,
+					TASK2_PRIORITY,
+					task2_stk,
+					TASK_STACKSIZE,
+					NULL,
+					0);
 
-	/* Send the file in the mail */
-	POST mail;
-	printf("%s\n", argv[1]);
-	altstrcpy(mail.filename, argv[1]);
-	mail.header_data = header_data;
-	OSMboxPost(Mbox1, &mail);
 	return 0;
 }
 
+alt_32 playlist(alt_32 argc, alt_8* argv[]){
+	if (argc <= 1){
+		puttyPrintLine("Syntax: %s filepath\n\r", argv[0]);
+		puttyPrintLine("Type \"%s help\" for a list of commands\n\r", argv[0]);
+		return -1;
+	}
+	struct playlist_functions {
+		char* command_string;
+		alt_32 (*command_function)(alt_32 argc, alt_8* argv[]);
+	} playlist_commands[] = {
+		{"print", playlist_print},
+		{"add", playlist_add},
+		{"new", playlist_new},
+		{"delete", playlist_delete},
+		{"remove", playlist_remove},
+		{"help", playlist_help},
+		{"play", playlist_play},
+		{NULL, NULL}
+	};
+
+	alt_32 i;
+	for (i=0; playlist_commands[i].command_string != NULL; i++) {
+		if (altstrcmp(playlist_commands[i].command_string, argv[1]) == 0){
+			playlist_commands[i].command_function(argc, argv);
+			return 0;
+		}
+	}
+
+	puttyPrintLine("Command not found\n\r");
+
+	return -1;
+}
 
 #endif
 

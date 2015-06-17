@@ -26,6 +26,8 @@
 #include "io.h"
 #include "system.h"
 
+#include "includes.h"
+
 
 /* Magic numbers */
 #define STRING_PARSER_MAXNUM_WORDS(string) string/2+1
@@ -51,16 +53,13 @@ void terminalInterface(){
 			puttyPrintLine("\n\rYou have entered too many characters for that command\n\r");
 		}
 
-		alt_8** array_of_words;
-		array_of_words = malloc(STRING_PARSER_MAXNUM_WORDS(stringlength));
+		alt_8* array_of_words[50];
 		alt_8 numwords = string_parser(string,array_of_words);
 		alt_32 returncode = command_interpreter(numwords, array_of_words);
 
 		if (returncode<0 && numwords > 0){
 			puttyPrintLine("Command not found\n\r");
 		}
-
-		free(array_of_words);
 	}
 }
 
@@ -87,6 +86,7 @@ alt_32 command_interpreter(alt_32 argc, alt_8* argv[]){
 		{"cp",copy_file},
 		{"cat",read_file},
 		{"wav",wav_play},
+		{"playlist", playlist},
 		{NULL,NULL} // This null function is to check we've read all the functions, new functions must go above it.
 	};
 	

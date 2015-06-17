@@ -15,6 +15,7 @@
 /* Magic numbers */
 
 #define SD_FOLDER_BITMASK 0x10
+#define SD_MOUNT_RETRIES 3
 
 
 /* ------------------------- Functions -------------------------- */
@@ -24,18 +25,26 @@ EmbeddedFileSystem** SD_mount(){
 	static EmbeddedFileSystem someFileSystem;
 	static EmbeddedFileSystem* someFileSystemPointer;
 
-	if (someFileSystemPointer!=NULL) return &someFileSystemPointer;
+	//if (someFileSystemPointer!=NULL && !UNMOUNT_SD_AFTER_OPERATION) return &someFileSystemPointer;
 
 	someFileSystemPointer = &someFileSystem;
 	esint8 check;
 	printf("Will init efsl now\n");
-	check = efs_init(someFileSystemPointer,"/dev/sda");
+	alt_32 count;
+	for (count=0; count<SD_MOUNT_RETRIES; count++){
+		//fs_umount(someFileSystemPointer);
+		check = efs_init(someFileSystemPointer,"/dev/sda");
+		if (check==0){
+			break;
+		}
+	}
 	if (check==0){
 		printf("Filesystem correctly initialized\n");
 	} else {
 		puttyPrintLine("Could not init filesystem\n\r");
 		printf("Could not init filesystem\n");
 		someFileSystemPointer = NULL;
+		return NULL;
 	}
 	return &someFileSystemPointer;
 }
@@ -45,9 +54,7 @@ void SD_unmount(void){
 	EmbeddedFileSystem** efsl;
 	efsl = SD_mount();
 	fs_umount(&((*efsl)->myFs));
-	if (!UNMOUNT_SD_AFTER_OPERATION){
-		*efsl=0;
-	}
+	*efsl=0;
 	
 	printf("Unmounted the SD card\n");
 }
